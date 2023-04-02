@@ -20,7 +20,7 @@ node('workers'){
     //        reportDir: "$PWD/coverage/marketplace",
     //        reportFiles: "index.html",
     //        reportName: "Coverage Report"
-        ])
+    //    ])
     }
 
     stage('Static Code Analysis'){
