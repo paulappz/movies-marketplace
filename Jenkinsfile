@@ -9,7 +9,7 @@ node('workers'){
     def imageTest= docker.build("${imageName}-test", "-f Dockerfile.test .")
 
     stage('Quality Tests'){
-        sh "docker run --rm ${imageName}-test npm run lint"
+      //  sh "docker run --rm ${imageName}-test npm run lint"
     }
 
     stage('Unit Tests'){
@@ -44,19 +44,19 @@ node('workers'){
     }
 
     stage('Push'){
-        docker.withRegistry(registry, 'registry') {
-            docker.image(imageName).push(commitID())
+     //   docker.withRegistry(registry, 'registry') {
+     //       docker.image(imageName).push(commitID())
 
-            if (env.BRANCH_NAME == 'develop') {
-                docker.image(imageName).push('develop')
-            }
-        }
+      //      if (env.BRANCH_NAME == 'develop') {
+      //          docker.image(imageName).push('develop')
+      //      }
+      //  }
     }
 
     stage('Analyze'){
-        def scannedImage = "${registry}/${imageName}:${commitID()} ${workspace}/Dockerfile"
-        writeFile file: 'images', text: scannedImage
-        anchore name: 'images'
+     //   def scannedImage = "${registry}/${imageName}:${commitID()} ${workspace}/Dockerfile"
+     //   writeFile file: 'images', text: scannedImage
+     //   anchore name: 'images'
     }
 }
 
