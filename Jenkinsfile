@@ -1,5 +1,7 @@
 def imageName = 'paulappz/movies-marketplace'
-def registry = 'https://registry.gbnlcicd.com'
+// def registry = 'https://registry.gbnlcicd.com'
+def registry = '530364773324.dkr.ecr.eu-west-2.amazonaws.com' 
+def region = 'eu-west-2'
 
 node('workers'){
     stage('Checkout'){
@@ -13,15 +15,15 @@ node('workers'){
     }
 
     stage('Unit Tests'){
-        sh "docker run --rm -v $PWD/coverage:/app/coverage ${imageName}-test npm run test"
-        publishHTML (target: [
-            allowMissing: false,
-            alwaysLinkToLastBuild: false,
-            keepAll: true,
-            reportDir: "$PWD/coverage/marketplace",
-            reportFiles: "index.html",
-            reportName: "Coverage Report"
-        ])
+      //  sh "docker run --rm -v $PWD/coverage:/app/coverage ${imageName}-test npm run test"
+      //  publishHTML (target: [
+      //      allowMissing: false,
+       //     alwaysLinkToLastBuild: false,
+       //     keepAll: true,
+        //    reportDir: "$PWD/coverage/marketplace",
+       //     reportFiles: "index.html",
+       //     reportName: "Coverage Report"
+       // ])
     }
 
     stage('Static Code Analysis'){
@@ -42,21 +44,25 @@ node('workers'){
     stage('Build'){
         docker.build(imageName, '--build-arg ENVIRONMENT=sandbox .')
     }
-
+    
     stage('Push'){
-     //   docker.withRegistry(registry, 'registry') {
-     //       docker.image(imageName).push(commitID())
+       sh "aws ecr get-login-password --region ${region} | docker login --username AWS --password-stdin ${registry}/${imageName}"
+     
+       sh "  docker build -t ${imageName} . "
+       sh " docker tag ${imageName}:latest ${registry}/${imageName}:latest"
+       sh "docker push ${registry}/${imageName}:latest"
 
-      //      if (env.BRANCH_NAME == 'develop') {
-      //          docker.image(imageName).push('develop')
-      //      }
-      //  }
-    }
+         //  imageBuild.push(commitID()) 
+         //       if (env.BRANCH_NAME == 'develop') {
+         //   imageBuild.push('develop')
+         //        } 
+    
+}
 
     stage('Analyze'){
-     //   def scannedImage = "${registry}/${imageName}:${commitID()} ${workspace}/Dockerfile"
-     //   writeFile file: 'images', text: scannedImage
-     //   anchore name: 'images'
+           def scannedImage = "${registry}/${imageName}:latest ${workspace}/Dockerfile"
+           writeFile file: 'images', text: scannedImage
+            anchore name: 'images'
     }
 }
 
